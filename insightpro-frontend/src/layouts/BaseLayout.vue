@@ -11,6 +11,7 @@
 
     <transition name="slide">
       <aside
+        @keydown.esc="closeSidebarOnEscape"
         v-if="showSidebar"
         class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-md p-4 md:hidden"
       >
@@ -18,27 +19,27 @@
         <nav>
           <RouterLink
             @click="closeSidebar"
-            to="/"
+            to="/dashboard"
             class="block py-2 px-3 rounded hover:bg-blue-100"
-            >Dashboard</RouterLink
+            >📊 Dashboard</RouterLink
           >
           <RouterLink
             @click="closeSidebar"
             to="/metrics"
             class="block py-2 px-3 rounded hover:bg-blue-100"
-            >Metrics</RouterLink
+            >📈 Metrics</RouterLink
           >
           <RouterLink
             @click="closeSidebar"
             to="/reports"
             class="block py-2 px-3 rounded hover:bg-blue-100"
-            >Reports</RouterLink
+            >📄 Reports</RouterLink
           >
           <RouterLink
             @click="closeSidebar"
-            to="/ai"
+            to="/insights"
             class="block py-2 px-3 rounded hover:bg-blue-100"
-            >AI Insights</RouterLink
+            >🧠 Insights</RouterLink
           >
         </nav>
       </aside>
@@ -48,21 +49,25 @@
     <aside class="w-64 bg-white shadow-lg hidden md:block">
       <div class="p-4 font-bold text-lg text-blue-600">InsightPro</div>
       <nav class="mt-6 px-4 space-y-2">
-        <RouterLink to="/" class="block py-2 px-3 rounded hover:bg-blue-100"
-          >Dashboard</RouterLink
+        <RouterLink
+          to="/dashboard"
+          class="block py-2 px-3 rounded hover:bg-blue-100"
+          >📊 Dashboard</RouterLink
         >
         <RouterLink
           to="/metrics"
           class="block py-2 px-3 rounded hover:bg-blue-100"
-          >Metrics</RouterLink
+          >📈 Metrics</RouterLink
         >
         <RouterLink
           to="/reports"
           class="block py-2 px-3 rounded hover:bg-blue-100"
-          >Reports</RouterLink
+          >📄 Reports</RouterLink
         >
-        <RouterLink to="/ai" class="block py-2 px-3 rounded hover:bg-blue-100"
-          >AI Insights</RouterLink
+        <RouterLink
+          to="/insights"
+          class="block py-2 px-3 rounded hover:bg-blue-100"
+          >🧠 Insights</RouterLink
         >
       </nav>
     </aside>
@@ -97,8 +102,13 @@
         <h1 class="text-xl font-semibold text-gray-700">Dashboard</h1>
 
         <div class="flex items-center gap-4">
-          <span class="text-sm text-gray-600">Hello, User</span>
-          <button class="text-sm text-red-500 hover:underline">Logout</button>
+          <span class="text-sm text-gray-600">Hello, {{ username }}</span>
+          <button
+            class="text-sm text-red-500 hover:underline cursor-pointer"
+            @click="onLogout"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
@@ -111,12 +121,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { useAuthStore } from "../store/auth";
+import { useRouter } from "vue-router";
+import { toast } from "vue3-toastify";
 
+const router = useRouter();
+const auth = useAuthStore();
 const showSidebar = ref(false);
 
+const username = computed(() => auth.user?.name || "Guest");
+
+const closeSidebarOnEscape = (event: KeyboardEvent) => {
+  if (event.key === "Escape") {
+    showSidebar.value = false;
+  }
+};
 const closeSidebar = () => {
   showSidebar.value = false;
+};
+
+const onLogout = () => {
+  auth.logout();
+  toast.success("Logged out successfully");
+  router.push("/login");
+
+  // Redirect to login page or perform any other logout logic
 };
 </script>
 

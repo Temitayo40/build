@@ -34,10 +34,12 @@
         />
 
         <button
+          :disabled="loading"
           type="submit"
-          class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 inline-flex items-center justify-center disabled:cursor-not-allowed"
         >
-          Register
+          {{ loading ? "Registering" : "Register" }}
+          <span v-if="loading" class="loader ml-2"></span>
         </button>
       </form>
 
@@ -68,17 +70,21 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../store/auth";
+import { toast } from "vue3-toastify";
 
 const name = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const loading = ref(false);
 const router = useRouter();
 const authStore = useAuthStore();
 
 const handleRegister = async () => {
+  loading.value = true;
   if (password.value !== confirmPassword.value) {
-    alert("Passwords don't match.");
+    toast.warning("Passwords don't match.");
+    loading.value = false;
     return;
   }
 
@@ -87,14 +93,15 @@ const handleRegister = async () => {
     email: email.value,
     password: password.value,
   });
-
+  loading.value = false;
   if (success) {
     router.push("/");
   }
 };
 
 const registerWithGoogle = () => {
-  window.location.href = import.meta.env.VITE_API_URL + "/auth/google";
+  window.location.href =
+    import.meta.env.VITE_API_URL + "/auth/google/callback  ";
 };
 </script>
 
@@ -103,5 +110,26 @@ const registerWithGoogle = () => {
   border: 1px solid #ddd;
   padding: 0.5rem;
   border-radius: 6px;
+}
+
+.input {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.loader {
+  border: 2px solid white;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  width: 1rem;
+  height: 1rem;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
